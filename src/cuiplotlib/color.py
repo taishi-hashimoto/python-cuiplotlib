@@ -1,3 +1,4 @@
+"Colorbar library."
 import curses
 
 
@@ -66,7 +67,7 @@ class Colorbar:
     def __init__(
         self,
         window: curses.window,
-        y0, x0,
+        x0, y0,
         cmap: 'Colormap',
         norm: 'Normalize' = None,
         vmin: str = None,

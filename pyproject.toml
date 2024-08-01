@@ -18,4 +18,5 @@ dependencies = [
 package-dir = {"" = "src"}
 
 [project.scripts]
-cuiplotlib-example = "cuiplotlib.example:main"
+cuiplotlib-examples-contour = "cuiplotlib.examples.contour:main"
+cuiplotlib-examples-bar = "cuiplotlib.examples.bar:main"

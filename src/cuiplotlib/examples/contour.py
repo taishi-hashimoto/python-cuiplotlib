@@ -1,7 +1,7 @@
 import curses
 import numpy as np
 import time
-from .colorbar import Colormap, Colorbar, Normalize
+from ..color import Colormap, Colorbar, Normalize
 
 
 def window(stdscr: curses.window):
@@ -9,7 +9,6 @@ def window(stdscr: curses.window):
     stdscr.nodelay(True)
 
     ymax, xmax = stdscr.getmaxyx()
-
 
     cmap = Colormap(under=curses.COLOR_BLACK)
     
