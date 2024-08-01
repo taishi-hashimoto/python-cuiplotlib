@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools >= 61.0"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "cuiplotlib"
+version = "1.0.0"
+description = "CUI plot library using curses."
+authors = [
+    {name = "Taishi Hashimoto", email = "hashimoto.taishi@nipr.ac.jp"}
+]
+requires-python = ">= 3.8"
+dependencies = [
+    "numpy"
+]
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[project.scripts]
+cuiplotlib-example = "cuiplotlib.example:main"
