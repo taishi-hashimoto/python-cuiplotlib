@@ -8,7 +8,7 @@ def autoticks(
     steps=(1, 2, 2.5, 5, 10),
     debug=False
 ):
-    """Simplified MaxNLocator in matplotlib.
+    """Simplified matplotlib's MaxNLocator's algorithm.
 
     Parameters
     ==========
@@ -52,3 +52,41 @@ def autoticks(
         return ticks, cands
     else:
         return ticks
+
+
+def autoformat(ticks: list[float|int]) -> str:
+    """Automated format string for given ticks.
+    
+    Parameters
+    ==========
+    ticks: list[float|int]
+        Tick values.
+    """
+
+    vmin = min(ticks)
+    vmax = max(ticks)
+
+    vrange = int(math.floor(math.log10(vmax - vmin)))
+    sigfigs = max(0, 3 - vrange)
+    thresh = 1e-3 * 10**vrange
+    while sigfigs >= 0:
+        if max(abs(x - round(x, sigfigs)) for x in ticks) < thresh:
+            sigfigs -= 1
+        else:
+            break
+    sigfigs += 1
+    return f"{{:1.{sigfigs}f}}"
+
+
+def default_formatter(ticks: list[float|int]):
+    """Default formatter.
+
+    Simplified matplotlib's ScalarFormatter.
+    
+    Parameters
+    ==========
+    ticks: list[float|int]
+        Tick values.
+    """
+    fmt = autoformat(ticks)
+    return [fmt.format(x) for x in ticks]
