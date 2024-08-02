@@ -8,10 +8,9 @@ def window(stdscr: curses.window):
     curses.curs_set(0)
     stdscr.nodelay(True)
 
-    axes = Axes(stdscr, 5, 1, 30, 0)
-    # axes.set_xlim(-5, 2*np.pi)
-    # axes.set_ylim(-3, 3)
-    
+    axes = Axes(stdscr, 5, 3, 30, 2)
+    axes.set_xlim(0, np.pi)
+    # axes.set_ylim(-3, 3)@
     off = 0
     while True:
         try:

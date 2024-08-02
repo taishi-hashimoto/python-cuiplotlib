@@ -89,6 +89,18 @@ class Axes:
     def _ymax(self) -> float:
         return self._get_first_valid(self._userlim.ymax, self._autolim.ymax)
 
+    def _is_inside(self, y=None, x=None):
+        y_inside = y is None or self._top <= y <= self._top + self._height
+        x_inside = x is None or self._left <= x <= self._left + self._width
+        return y_inside and x_inside
+
+    def write(self, y: int, x: int, *args, clip=False, **kwargs):
+        """Same as `self._window.addstr(y, x, *args, **kwargs)`,
+        with bounds check.
+        
+        """
+        if not clip or self._is_inside(y, x):
+            self._window.addstr(y, x, *args, **kwargs)
 
     def _set_transform(self):
         # First compute x and y ticks.
@@ -144,18 +156,20 @@ class Axes:
         
         xaxis_x, xaxis_y = self._transform(np.array([self._xmin, self._xmax]), y0)
         yaxis_x, yaxis_y = self._transform(x0, np.array([self._ymin, self._ymax]))
+        yaxis_x = math.floor(yaxis_x)
+        xaxis_y = math.ceil(xaxis_y)
         # X axis.
-        xmin, xmax = np.fix(xaxis_x)
-        for x1 in np.arange(xmin, xmax+1, 1):
+        xmin, xmax = map(math.floor, xaxis_x)
+        for x1 in range(xmin, xmax+1, 1):
             try:
-                self._window.addstr(math.ceil(xaxis_y), int(x1), "_")
+                self.write(xaxis_y, x1, "_", clip=True)
             except:
                 pass
         # Y axis.
-        ymax, ymin = np.ceil(yaxis_y)
-        for ypos in  np.arange(ymin, ymax+1, 1):
+        ymax, ymin = map(math.ceil, yaxis_y)
+        for ypos in  range(ymin, ymax+1, 1):
             try:
-                self._window.addstr(math.ceil(ypos), int(yaxis_x), "|")
+                self.write(ypos, yaxis_x, "|", clip=True)
             except:
                 pass
 
@@ -164,15 +178,17 @@ class Axes:
 
         # X axis.
         xticklabels = self._xformatter(self._xticks)
-        for xpos, xstr in zip(xticks, xticklabels):
+        for xpos, xstr in zip(xticks.astype(int), xticklabels):
             # X ticks.
             try:
-                self._window.addstr(math.ceil(xaxis_y) + 1, int(xpos), "|")
+                if self._is_inside(x=xpos):
+                    self.write(xaxis_y + 1, xpos, "|")
             except:
                 pass
             # X tick labels.
             try:
-                self._window.addstr(math.ceil(xaxis_y) + 1, int(xpos)+1, xstr)
+                if self._is_inside(x=xpos):
+                    self.write(xaxis_y + 1, xpos+1, xstr)
             except:
                 pass
 
@@ -180,13 +196,16 @@ class Axes:
         yticklabels = self._yformatter(self._yticks)
         for ypos, ystr in zip(yticks, yticklabels):
             # Y ticks.
+            ypos = math.ceil(ypos)
             try:
-                self._window.addstr(math.ceil(ypos), int(yaxis_x)-1, "_")
+                if self._is_inside(y=ypos):
+                    self.write(ypos, yaxis_x-1, "_")
             except:
                 pass
             # Y tick labels.
             try:
-                self._window.addstr(math.ceil(ypos)+1, int(yaxis_x)-len(ystr), ystr)
+                if self._is_inside(y=ypos):
+                    self.write(ypos + 1, yaxis_x - len(ystr), ystr)
             except:
                 pass
 
@@ -209,6 +228,6 @@ class Axes:
             yy0 - yy > 1/3), "`-", ".")
         for xi, yi, c in zip(xx, yy, cc):
             try:
-                self._window.addstr(math.ceil(yi), math.floor(xi), c)
+                self.write(math.ceil(yi), math.floor(xi), c)
             except:
                 pass
