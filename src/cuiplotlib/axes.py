@@ -2,7 +2,7 @@ import curses
 import math
 import numpy as np
 from .transform import Transform
-from .ticker import autoticks, autoformat, default_formatter
+from .ticker import autoticks, default_formatter
 from .color import Colormap
 
 
@@ -60,9 +60,25 @@ class Axes:
     def _ymax(self) -> float:
         return self._get_first_valid(self._userlim.ymax, self._autolim.ymax)
 
+    @property
+    def right(self) -> int:
+        return self._left + self._width
+    
+    @property
+    def bottom(self) -> int:
+        return self._top + self._height
+
+    @property
+    def top(self) -> int:
+        return self._top
+
+    @property
+    def left(self) -> int:
+        return self._left
+
     def _is_inside(self, y=None, x=None):
-        y_inside = y is None or self._top <= y <= self._top + self._height
-        x_inside = x is None or self._left <= x <= self._left + self._width
+        y_inside = y is None or self._top <= y <= self.bottom
+        x_inside = x is None or self._left <= x <= self.right
         return y_inside and x_inside
 
     def write(self, y: int, x: int, *args, clip=False, **kwargs):
@@ -187,7 +203,7 @@ class Axes:
     ):
         cmap = Colormap()
 
-        self._datalim.update(np.min(x), np.min(y), np.max(x), np.max(y))
+        self._datalim.update(np.nanmin(x), np.nanmin(y), np.nanmax(x), np.nanmax(y))
         self._set_transform()
         
         self.axes()
@@ -201,17 +217,16 @@ class Axes:
             yy0 - yy > 2/3,
             yy0 - yy > 1/3), "`-", ".")
         for xi, yi, s in zip(xx, yy, ss):
+            if np.isnan(yi) or np.isnan(xi):
+                continue
             yi = math.ceil(yi)
             xi = math.floor(xi)
-            try:
-                if c is not None:
-                    # raise RuntimeError(f"{cmap[c]=}")
-                    self.write(yi, xi, s, cmap[c])
-                else:
-                    # raise RuntimeError(f"{c=}")
-                    self.write(yi, xi, s)
-            except:
-                raise
+            if c is not None:
+                # raise RuntimeError(f"{cmap[c]=}")
+                self.write(yi, xi, s, cmap[c], clip=True)
+            else:
+                # raise RuntimeError(f"{c=}")
+                self.write(yi, xi, s, clip=True)
 
 
 class Bounds:
