@@ -1,11 +1,11 @@
 # %%
 import matplotlib.pyplot as plt
 import numpy as np
-from cuiplotlib.ticker import autoticks
 import sys
 from os.path import dirname, join
-
 sys.path.insert(0, join(dirname(__file__), "..", "src"))
+
+from cuiplotlib.ticker import autoticks
 
 data = np.random.normal(size=10) * 10
 
