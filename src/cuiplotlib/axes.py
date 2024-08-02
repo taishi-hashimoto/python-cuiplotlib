@@ -215,7 +215,7 @@ class Axes:
         yy0 = np.ceil(yy)
         ss = np.select((
             yy0 - yy > 2/3,
-            yy0 - yy > 1/3), "`-", ".")
+            yy0 - yy > 1/3), "`-", "_")
         for xi, yi, s in zip(xx, yy, ss):
             if np.isnan(yi) or np.isnan(xi):
                 continue
@@ -227,6 +227,42 @@ class Axes:
             else:
                 # raise RuntimeError(f"{c=}")
                 self.write(yi, xi, s, clip=True)
+
+    def bar(
+        self,
+        x, y, y0=None, c=None
+    ):
+        cmap = Colormap()
+
+        self._datalim.update(np.nanmin(x), np.nanmin(y), np.nanmax(x), np.nanmax(y))
+        self._set_transform()
+        
+        self.axes()
+
+        if y0 is None:
+            y0 = np.zeros_like(y)
+
+        wf, hf = self._transform(x, y)
+        wf0, hf0 = self._transform(x, y0)
+        xx = np.linspace(self._left, self._left+self._width, self._width)
+        yy = np.interp(xx, wf, hf, left=np.nan, right=np.nan)
+        yy0 = np.interp(xx, wf0, hf0, left=np.nan, right=np.nan)
+
+
+        for xi, yi, yi0 in zip(xx, yy, yy0):
+            if np.isnan(yi) or np.isnan(xi) or np.isnan(yi0):
+                continue
+            yi = math.ceil(yi)
+            yi0 = math.ceil(yi0)
+            xi = math.floor(xi)
+            if yi0 > yi:
+                yi0, yi = yi, yi0
+            if c is not None:
+                for y1 in range(yi0, yi+1):
+                    self.write(y1, xi, "|", cmap[c], clip=True)
+            else:
+                for y1 in range(yi0, yi+1):
+                    self.write(y1, xi, "|", clip=True)
 
 
 class Bounds:
