@@ -3,36 +3,7 @@ import math
 import numpy as np
 from .transform import Transform
 from .ticker import autoticks, autoformat, default_formatter
-
-
-class Bounds:
-    def __init__(self, xmin=None, ymin=None, xmax=None, ymax=None):
-        self.xmin = xmin
-        self.ymin = ymin
-        self.xmax = xmax
-        self.ymax = ymax
-
-    def update(self, xmin, ymin, xmax, ymax):
-        if xmin is not None:
-            if self.xmin is None:
-                self.xmin = xmin
-            else:
-                self.xmin = min(self.xmin, xmin)
-        if xmax is not None:
-            if self.xmax is None:
-                self.xmax = xmax
-            else:
-                self.xmax = max(self.xmax, xmax)
-        if ymin is not None:
-            if self.ymin is None:
-                self.ymin = ymin
-            else:
-                self.ymin = min(self.ymin, ymin)
-        if ymax is not None:
-            if self.ymax is None:
-                self.ymax = ymax
-            else:
-                self.ymax = max(self.ymax, ymax)
+from .color import Colormap
 
 
 class Axes:
@@ -209,10 +180,13 @@ class Axes:
             except:
                 pass
 
-    def line(
+    def plot(
         self,
-        x, y
+        x, y,
+        c=None
     ):
+        cmap = Colormap()
+
         self._datalim.update(np.min(x), np.min(y), np.max(x), np.max(y))
         self._set_transform()
         
@@ -223,11 +197,49 @@ class Axes:
         yy = np.interp(xx, wf, hf, left=np.nan, right=np.nan)
 
         yy0 = np.ceil(yy)
-        cc = np.select((
+        ss = np.select((
             yy0 - yy > 2/3,
             yy0 - yy > 1/3), "`-", ".")
-        for xi, yi, c in zip(xx, yy, cc):
+        for xi, yi, s in zip(xx, yy, ss):
+            yi = math.ceil(yi)
+            xi = math.floor(xi)
             try:
-                self.write(math.ceil(yi), math.floor(xi), c)
+                if c is not None:
+                    # raise RuntimeError(f"{cmap[c]=}")
+                    self.write(yi, xi, s, cmap[c])
+                else:
+                    # raise RuntimeError(f"{c=}")
+                    self.write(yi, xi, s)
             except:
-                pass
+                raise
+
+
+class Bounds:
+    def __init__(self, xmin=None, ymin=None, xmax=None, ymax=None):
+        self.xmin = xmin
+        self.ymin = ymin
+        self.xmax = xmax
+        self.ymax = ymax
+
+    def update(self, xmin, ymin, xmax, ymax):
+        if xmin is not None:
+            if self.xmin is None:
+                self.xmin = xmin
+            else:
+                self.xmin = min(self.xmin, xmin)
+        if xmax is not None:
+            if self.xmax is None:
+                self.xmax = xmax
+            else:
+                self.xmax = max(self.xmax, xmax)
+        if ymin is not None:
+            if self.ymin is None:
+                self.ymin = ymin
+            else:
+                self.ymin = min(self.ymin, ymin)
+        if ymax is not None:
+            if self.ymax is None:
+                self.ymax = ymax
+            else:
+                self.ymax = max(self.ymax, ymax)
+

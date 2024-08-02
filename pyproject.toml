@@ -19,4 +19,4 @@ package-dir = {"" = "src"}
 
 [project.scripts]
 cuiplotlib-examples-contour = "cuiplotlib.examples.contour:main"
-cuiplotlib-examples-line = "cuiplotlib.examples.line:main"
+cuiplotlib-examples-plot = "cuiplotlib.examples.plot:main"

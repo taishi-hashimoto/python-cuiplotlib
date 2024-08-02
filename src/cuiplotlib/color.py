@@ -4,8 +4,21 @@ import curses
 
 class Colormap:
     "Colormap."
+    
+    BASE_COLORS = {
+        # color 1 is under, by default same as 2
+        "b": (curses.COLOR_BLUE, 2),
+        "c": (curses.COLOR_CYAN, 3),
+        "g": (curses.COLOR_GREEN, 4),
+        "y": (curses.COLOR_YELLOW, 5),
+        "r": (curses.COLOR_RED, 6),
+        "m": (curses.COLOR_MAGENTA, 7),
+        # color 8 is over, by default same as 7
+        "k": (curses.COLOR_BLACK, 9),  # invalid
+        "w": (curses.COLOR_WHITE, 10),
+    }
 
-    DEFAULT_COLORS = (
+    DEFAULT_CONTINUOUS = (
         curses.COLOR_BLUE,
         curses.COLOR_CYAN,
         curses.COLOR_GREEN,
@@ -15,7 +28,7 @@ class Colormap:
 
     def __init__(self, colors=None, under=None, over=None, invalid=None):
         if colors is None:
-            colors = self.DEFAULT_COLORS
+            colors = self.DEFAULT_CONTINUOUS
         for i, color in enumerate(colors, 2):
             curses.init_pair(i, color, curses.COLOR_BLACK)
         if under is None:
@@ -27,6 +40,7 @@ class Colormap:
         curses.init_pair(1, under, curses.COLOR_BLACK)
         curses.init_pair(len(colors) + 2, over, curses.COLOR_BLACK)
         curses.init_pair(len(colors) + 3, invalid, curses.COLOR_BLACK)
+        curses.init_pair(len(colors) + 4, curses.COLOR_WHITE, curses.COLOR_BLACK)
         self._colors = colors  # Specified color
 
     @property
@@ -42,6 +56,11 @@ class Colormap:
             index = 1
         if index > self.ncolors:
             index = self.ncolors
+        return curses.color_pair(index)
+
+    def __getitem__(self, index):
+        if isinstance(index, str):  # named colors
+            index = self.BASE_COLORS[index][1]
         return curses.color_pair(index)
 
     @property
