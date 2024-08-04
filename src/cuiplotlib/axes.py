@@ -1,6 +1,7 @@
 import curses
 import math
 import numpy as np
+from scipy.interpolate import RegularGridInterpolator
 from .transform import Transform
 from .ticker import autoticks, default_formatter
 from .color import Colormap
@@ -227,8 +228,26 @@ class Axes:
                 # raise RuntimeError(f"{c=}")
                 self.write(yi, xi, s, clip=True)
 
-    # def matrix(self, x, y, z):
-        
+    def matrix(self, x, y, z, cmap, norm):
+        if np.ndim(x) == 2 and np.ndim(y) == 2:
+            x = x[0, :]
+            y = y[:, 0]
+        self._datalim.update(np.nanmin(x), np.nanmin(y), np.nanmax(x), np.nanmax(y))
+        self._set_transform()
+        self.axes()
+
+        wf, hf = self._transform(x, y)
+        interp = RegularGridInterpolator((wf, hf), z, bounds_error=False, fill_value=None)
+        xx = np.linspace(self._left, self._left + self._width - 1, self._width)
+        yy = np.linspace(self._top + 1, self._top + self._height, self._height)
+        xx_g, yy_g = np.meshgrid(xx, yy)
+        zz_g = interp((xx_g, yy_g))
+        zz_g = np.reshape([cmap[cmap.get_color(norm(zzz))] for zzz in np.ravel(zz_g)], zz_g.shape)
+
+        for xx1, yy1, zz1 in zip(xx_g.ravel(), yy_g.ravel(), zz_g.ravel()):
+            yy1 = math.ceil(yy1)
+            xx1 = math.floor(xx1)
+            self.write(yy1, xx1, "■", zz1)
 
     def bar(
         self,

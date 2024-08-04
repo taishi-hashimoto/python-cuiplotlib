@@ -67,7 +67,7 @@ class Colormap:
 
     def get_color(self, value: float):
         try:
-            index = int(value * (len(self._colors) - 1))
+            index = int(value * (len(self._colors) + 1))
             if index < 1:
                 index = self._under
             elif index >= len(self._colors):
