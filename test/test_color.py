@@ -3,7 +3,7 @@ import curses
 import time
 import numpy as np
 from cuiplotlib.axes import Axes
-from cuiplotlib.color2 import Normalize, Colormap
+from cuiplotlib.color import Normalize, Colormap
 
 from scipy.interpolate import RegularGridInterpolator
 

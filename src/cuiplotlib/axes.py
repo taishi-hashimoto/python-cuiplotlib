@@ -205,17 +205,16 @@ class Axes:
 
         self._datalim.update(np.nanmin(x), np.nanmin(y), np.nanmax(x), np.nanmax(y))
         self._set_transform()
-        
         self.axes()
 
         wf, hf = self._transform(x, y)
-        xx = np.linspace(self._left, self._left+self._width, self._width)
+        xx = np.linspace(self._left, self._left + self._width - 1, self._width)
         yy = np.interp(xx, wf, hf, left=np.nan, right=np.nan)
 
         yy0 = np.ceil(yy)
         ss = np.select((
-            yy0 - yy > 2/3,
-            yy0 - yy > 1/3), "`-", "_")
+            yy0 - yy > 2 / 3,
+            yy0 - yy > 1 / 3), "`-", "_")
         for xi, yi, s in zip(xx, yy, ss):
             if np.isnan(yi) or np.isnan(xi):
                 continue
@@ -227,6 +226,9 @@ class Axes:
             else:
                 # raise RuntimeError(f"{c=}")
                 self.write(yi, xi, s, clip=True)
+
+    # def matrix(self, x, y, z):
+        
 
     def bar(
         self,

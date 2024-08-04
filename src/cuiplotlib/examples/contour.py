@@ -1,7 +1,7 @@
 import curses
 import numpy as np
 import time
-from ..color import Colormap, Colorbar, Normalize
+from ..color_ import Colormap, Colorbar, Normalize
 
 
 def window(stdscr: curses.window):
