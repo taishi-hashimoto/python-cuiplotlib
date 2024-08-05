@@ -20,3 +20,4 @@ package-dir = {"" = "src"}
 [project.scripts]
 cuiplotlib-examples-contour = "cuiplotlib.examples.contour:main"
 cuiplotlib-examples-plot = "cuiplotlib.examples.plot:main"
+cuiplotlib-mqlogrecv = "cuiplotlib.logging:mqrecv"
