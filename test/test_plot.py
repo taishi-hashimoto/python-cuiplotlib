@@ -23,7 +23,7 @@ def window(stdscr: curses.window):
             # y = np.full_like(x, 1)
             y = 2 * x + 1
             # y = np.sin(x)
-            ax.plot(x, y, "r")
+            ax.line(x, y, "r")
             stdscr.refresh()
             time.sleep(0.1)
         except KeyboardInterrupt:

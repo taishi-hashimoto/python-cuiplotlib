@@ -22,7 +22,7 @@ def window(stdscr: curses.window):
             x = np.linspace(0, 2*np.pi)
             y = np.sin(x - off)
             
-            axes.plot(x, y, c=color)
+            axes.line(x, y, c=color)
             # axes.plot(x, y)
             stdscr.refresh()
             time.sleep(0.1)
