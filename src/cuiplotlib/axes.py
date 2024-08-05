@@ -39,6 +39,9 @@ class Axes:
         self._x0 = None
         self._y0 = None
 
+        self._xaxis_location = "bottom"
+        self._yaxis_location = "left"
+
     @staticmethod
     def _get_first_valid(*args):
         for each in args:
@@ -134,68 +137,80 @@ class Axes:
     def axes(self):
         # Axes
         if self._x0 is None:
-            x0 = self._xmin
+            if self._yaxis_location == "right":
+                x0 = self._xmax
+            else:
+                x0 = self._xmin
         else:
             x0 = self._x0
         if self._y0 is None:
-            y0 = self._ymin
+            if self._xaxis_location == "top":
+                y0 = self._ymax
+            else:
+                y0 = self._ymin
         else:
             y0 = self._y0
-        
         xaxis_x, xaxis_y = self._transform(np.array([self._xmin, self._xmax]), y0)
         yaxis_x, yaxis_y = self._transform(x0, np.array([self._ymin, self._ymax]))
         yaxis_x = math.floor(yaxis_x)
         xaxis_y = math.ceil(xaxis_y)
-        # X axis.
-        xmin, xmax = map(math.floor, xaxis_x)
-        for x1 in range(xmin, xmax+1, 1):
-            try:
-                self.write(xaxis_y, x1, "_", clip=True)
-            except:
-                pass
-        # Y axis.
-        ymax, ymin = map(math.ceil, yaxis_y)
-        for ypos in  range(ymin, ymax+1, 1):
-            try:
-                self.write(ypos, yaxis_x, "|", clip=True)
-            except:
-                pass
+        if self._xaxis_location is not None:
+            # X axis.
+            xmin, xmax = map(math.floor, xaxis_x)
+            for x1 in range(xmin, xmax+1, 1):
+                try:
+                    self.write(xaxis_y, x1, "_", clip=True)
+                except:
+                    pass
+        if self._yaxis_location is not None:
+            # Y axis.
+            ymax, ymin = map(math.ceil, yaxis_y)
+            for ypos in  range(ymin, ymax+1, 1):
+                try:
+                    self.write(ypos, yaxis_x, "|", clip=True)
+                except:
+                    pass
 
         # Build ticks.
         xticks, yticks = self._transform(np.array(self._xticks), np.array(self._yticks))
 
-        # X axis.
-        xticklabels = self._xformatter(self._xticks)
-        for xpos, xstr in zip(xticks.astype(int), xticklabels):
-            # X ticks.
-            try:
-                if self._is_inside(x=xpos):
-                    self.write(xaxis_y + 1, xpos, "|")
-            except:
-                pass
-            # X tick labels.
-            try:
-                if self._is_inside(x=xpos):
-                    self.write(xaxis_y + 1, xpos+1, xstr)
-            except:
-                pass
+        if self._xaxis_location is not None:
+            # X axis.
+            xticklabels = self._xformatter(self._xticks)
+            for xpos, xstr in zip(xticks.astype(int), xticklabels):
+                # X ticks.
+                try:
+                    if self._is_inside(x=xpos):
+                        self.write(xaxis_y + 1, xpos, "|")
+                except:
+                    pass
+                # X tick labels.
+                try:
+                    if self._is_inside(x=xpos):
+                        self.write(xaxis_y + 1, xpos+1, xstr)
+                except:
+                    pass
 
-        # Y axis.
-        yticklabels = self._yformatter(self._yticks)
-        for ypos, ystr in zip(yticks, yticklabels):
-            # Y ticks.
-            ypos = math.ceil(ypos)
-            try:
-                if self._is_inside(y=ypos):
-                    self.write(ypos, yaxis_x-1, "_")
-            except:
-                pass
-            # Y tick labels.
-            try:
-                if self._is_inside(y=ypos):
-                    self.write(ypos + 1, yaxis_x - len(ystr), ystr)
-            except:
-                pass
+        if self._yaxis_location is not None:
+            # Y axis.
+            yticklabels = self._yformatter(self._yticks)
+            for ypos, ystr in zip(yticks, yticklabels):
+                # Y ticks.
+                ypos = math.ceil(ypos)
+                try:
+                    if self._is_inside(y=ypos):
+                        self.write(ypos, yaxis_x-1, "_")
+                except:
+                    pass
+                # Y tick labels.
+                try:
+                    if self._is_inside(y=ypos):
+                        if self._yaxis_location == "left":
+                            self.write(ypos + 1, yaxis_x - len(ystr), ystr)
+                        elif self._yaxis_location == "right":
+                            self.write(ypos + 1, yaxis_x + 1, ystr)
+                except:
+                    pass
 
     def line(
         self,
