@@ -5,7 +5,6 @@ from scipy.interpolate import RegularGridInterpolator
 from .transform import Transform
 from .ticker import autoticks, default_formatter
 from .color import Colormap
-from .logging import mqlog
 
 
 class Axes:

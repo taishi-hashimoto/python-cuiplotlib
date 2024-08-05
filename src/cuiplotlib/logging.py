@@ -1,29 +1,34 @@
 import zmq
 
 
-global_logger = None
+DEFAULT_HOST = "localhost"
+DEFAULT_PORT = 51840
 
 
-class MQLogger:
-    def __init__(self, mqspec: str):
+class MQOut:
+    def __init__(self, mqspec: str = f"tcp://*:{DEFAULT_PORT}"):
+        self._buf = []
+        self.reset(mqspec)
+
+    def reset(self, mqspec: str):
         self._socket: zmq.Socket = zmq.Context().socket(zmq.PUB)
         self._socket.bind(mqspec)
+        self._buf.clear()
 
-    def print(self, message: str):
-        self._socket.send_string(str(message), zmq.DONTWAIT)
+    def write(self, message: str):
+        self._buf.append(message)
+        if message.endswith("\n"):
+            self.flush()
+
+    def flush(self):
+        self._socket.send_string("".join(self._buf), zmq.DONTWAIT)
+        self._buf.clear()
 
 
-def mqrecv(mqspec: str = "tcp://localhost:51840"):
+def mqrecv(mqspec: str = f"tcp://{DEFAULT_HOST}:{DEFAULT_PORT}"):
     socket = zmq.Context().socket(zmq.SUB)
     socket.setsockopt(zmq.SUBSCRIBE, b"")
     socket.connect(mqspec)
     while True:
         data = socket.recv_string()
-        print(data)
-
-
-def mqlog(msg, mqspec: str = "tcp://*:51840"):
-    global global_logger
-    if global_logger is None:
-        global_logger = MQLogger(mqspec)
-    global_logger.print(msg)
+        print(data, end="", flush=True)
