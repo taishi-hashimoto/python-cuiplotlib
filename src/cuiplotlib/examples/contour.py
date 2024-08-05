@@ -14,8 +14,6 @@ def window(stdscr: curses.window):
     cax = Axes(stdscr, ax.right + 2, 2)
     norm = Normalize(-3, 3)
     cmap = Colormap()
-    
-    cax.set_xlim(0, 1)
 
     mqout = MQOut()
 
@@ -30,16 +28,16 @@ def window(stdscr: curses.window):
 
             # cax.set_xlim(0, 1)
             # cax.set_xlim(-3, 3)
-            x = np.linspace(0, 1, 2)
+            x = np.linspace(0, 1, 1)
             y = np.linspace(-3, 3, 10)
+    
+            cax.set_xlim(0, 1)
             cax._datalim.update(np.nanmin(x), np.nanmin(y), np.nanmax(x), np.nanmax(y))
             cax._set_transform()
-            print(f"{min(x)}, {max(x)}", file=mqout)
-            print(f"{min(y)}, {max(y)}", file=mqout)
+            # print(f"{min(x)}, {max(x)}", file=mqout)
+            # print(f"{min(y)}, {max(y)}", file=mqout)
 
-            cax.axes()
-
-            cax.matrix(x, y, [y, y], cmap=cmap, norm=norm)
+            cax.matrix(x, y, [y], cmap=cmap, norm=norm)
 
             stdscr.refresh()
             time.sleep(1)
