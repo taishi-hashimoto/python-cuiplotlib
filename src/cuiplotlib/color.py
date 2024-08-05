@@ -28,7 +28,7 @@ class ColorManager:
         if key in self._data:
             return self._data[key]
         else:
-            i = len(self._data)
+            i = len(self._data) + 1
             curses.init_pair(i, foreground_color, background_color)
             self._data[key] = i
         return i
@@ -66,9 +66,10 @@ class Colormap:
             color_manager = ColorManager()
 
     def get_color(self, value: float):
+        "value: normalized value in [0, 1] range."
         try:
-            index = int(value * (len(self._colors) + 1))
-            if index < 1:
+            index = int(value * (len(self._colors)))
+            if index < 0:
                 index = self._under
             elif index >= len(self._colors):
                 index = self._over
