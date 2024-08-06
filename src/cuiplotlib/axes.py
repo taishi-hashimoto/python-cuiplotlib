@@ -93,7 +93,7 @@ class Axes:
         if not clip or self._is_inside(y, x):
             self._window.addstr(y, x, *args, **kwargs)
 
-    def _set_transform(self):
+    def _set_transform(self, top=None, left=None, height=None, width=None):
         # First compute x and y ticks.
         try:
             self._xticks = autoticks(
@@ -115,8 +115,16 @@ class Axes:
             ymax = None
 
         self._autolim.update(xmin, ymin, xmax, ymax)
+        if top is None:
+            top = self._top
+        if left is None:
+            left = self._left
+        if height is None:
+            height = self._height
+        if width is None:
+            width = self._width
         self._transform = Transform(
-            self._top, self._left, self._height, self._width,
+            top, left, height, width,
             self._xmin, self._xmax,
             self._ymin, self._ymax)
 
@@ -248,12 +256,12 @@ class Axes:
             x = x[0, :]
             y = y[:, 0]
         self._datalim.update(np.nanmin(x), np.nanmin(y), np.nanmax(x), np.nanmax(y))
-        self._set_transform()
+        self._set_transform(left=self._left+1, width=self._width-1)
         self.axes()
 
         wf, hf = self._transform(x, y)
         interp = RegularGridInterpolator((wf, hf), z, bounds_error=False, fill_value=None)
-        xx = np.linspace(self._left, self._left + self._width - 1, self._width)
+        xx = np.linspace(self._left+2, self._left + self._width - 1, self._width - 1)
         yy = np.linspace(self._top + 1, self._top + self._height, self._height)
         xx_g, yy_g = np.meshgrid(xx, yy)
         zz_g = interp((xx_g, yy_g))
