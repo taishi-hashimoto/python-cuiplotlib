@@ -8,21 +8,30 @@ class ColorManager:
         self._data = {}
 
         # Some default colors.
-        self.new("b", curses.COLOR_BLUE, -1)
-        self.new("c", curses.COLOR_CYAN, -1)
-        self.new("g", curses.COLOR_GREEN, -1)
-        self.new("y", curses.COLOR_YELLOW, -1)
-        self.new("r", curses.COLOR_RED, -1)
-        self.new("m", curses.COLOR_MAGENTA, -1)
-        self.new("k", curses.COLOR_BLACK, -1)
-        self.new("w", curses.COLOR_WHITE, -1)
+        self.new("b", curses.COLOR_BLUE)
+        self.new("c", curses.COLOR_CYAN)
+        self.new("g", curses.COLOR_GREEN)
+        self.new("y", curses.COLOR_YELLOW)
+        self.new("r", curses.COLOR_RED)
+        self.new("m", curses.COLOR_MAGENTA)
+        self.new("k", curses.COLOR_BLACK)
+        self.new("w", curses.COLOR_WHITE)
         self.new("none", -1, -1)
+
+        self.new("bg_b", -1, curses.COLOR_BLUE)
+        self.new("bg_c", -1, curses.COLOR_CYAN)
+        self.new("bg_g", -1, curses.COLOR_GREEN)
+        self.new("bg_y", -1, curses.COLOR_YELLOW)
+        self.new("bg_r", -1, curses.COLOR_RED)
+        self.new("bg_m", -1, curses.COLOR_MAGENTA)
+        self.new("bg_k", -1, curses.COLOR_BLACK)
+        self.new("bg_w", -1, curses.COLOR_WHITE)
 
     def new(
         self,
         key,
         foreground_color,
-        background_color=curses.COLOR_BLACK,
+        background_color=-1,
     ):
         "Initialize a color pair with an arbitrary key and return its index."
         if key in self._data:
@@ -48,6 +57,12 @@ color_manager = None
 
 
 class Colormap:
+    @staticmethod
+    def jet_bg():
+        return Colormap(
+            ["bg_b", "bg_c", "bg_g", "bg_y", "bg_r", "bg_m"]
+        )
+
     def __init__(self, colors=None, under=None, over=None, invalid=None):
         if colors is None:
             colors = "bcgyrm"

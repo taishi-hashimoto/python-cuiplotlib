@@ -91,7 +91,7 @@ class Axes:
         
         """
         if not clip or self._is_inside(y, x):
-            self._window.addstr(y, x, *args, **kwargs)
+            self._window.addstr(int(y), int(x), *args, **kwargs)
 
     def _set_transform(self, top=None, left=None, height=None, width=None):
         # First compute x and y ticks.
@@ -267,10 +267,12 @@ class Axes:
         zz_g = interp((xx_g, yy_g))
         zz_g = np.reshape([cmap[cmap.get_color(norm(zzz))] for zzz in np.ravel(zz_g)], zz_g.shape)
 
-        for xx1, yy1, zz1 in zip(xx_g.ravel(), yy_g.ravel(), zz_g.ravel()):
-            yy1 = math.ceil(yy1)
-            xx1 = math.floor(xx1)
-            self.write(yy1, xx1, "■", zz1)
+        xx_g = np.floor(xx_g)
+        yy_g = np.ceil(yy_g)
+        cc_g = np.full_like(zz_g, " ", dtype=str)
+        cc_g[-1, :] = "_"
+        for xx1, yy1, zz1, cc1 in zip(xx_g.ravel(), yy_g.ravel(), zz_g.ravel(), cc_g.ravel()):
+            self.write(yy1, xx1, cc1, zz1)
 
     def bar(
         self,

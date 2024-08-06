@@ -13,18 +13,18 @@ def window(stdscr: curses.window):
     ax = Axes(stdscr, 2, 2, 10)
     cax = Axes(stdscr, ax.right + 3, 2, 5)
     norm = Normalize(-3, 3)
-    cmap = Colormap()
+    cmap = Colormap.jet_bg()
 
     mqout = MQOut()
+    z = np.random.normal(size=(20, 30))
 
     while True:
         try:
             nx = 20
             ny = 30
-            z = np.random.normal(size=(20, 30))
             x = np.linspace(-5, 5, nx)
             y = np.linspace(-5, 5, ny)
-            ax.matrix(x, y, z, cmap=Colormap(), norm=norm)
+            ax.matrix(x, y, z, cmap=cmap, norm=norm)
 
             # cax.set_xlim(0, 1)
             # cax.set_xlim(-3, 3)
