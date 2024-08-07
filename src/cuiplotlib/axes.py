@@ -8,11 +8,15 @@ from .color import Colormap, Normalize
 
 
 class Axes:
+    "Figure axes."
+
     def __init__(
         self,
         window: curses.window,
-        left_margin=0, bottom_margin=0,
-        right_margin=0, top_margin=0
+        left_margin: int = 0,
+        bottom_margin: int = 0,
+        right_margin: int = 0,
+        top_margin: int = 0
     ):
         ymax, xmax = window.getmaxyx()
         width = xmax - left_margin - right_margin
@@ -68,7 +72,7 @@ class Axes:
     @property
     def right(self) -> int:
         return self._left + self._width
-    
+
     @property
     def bottom(self) -> int:
         return self._top + self._height
@@ -89,7 +93,7 @@ class Axes:
     def write(self, y: int, x: int, *args, clip=False, **kwargs):
         """Same as `self._window.addstr(y, x, *args, **kwargs)`,
         with bounds check.
-        
+
         """
         if not clip or self._is_inside(y, x):
             self._window.addstr(int(y), int(x), *args, **kwargs)
@@ -102,7 +106,7 @@ class Axes:
                 self._get_first_valid(self._userlim.xmax, self._datalim.xmax))
             xmin = min(self._xticks)
             xmax = max(self._xticks)
-        except:
+        except Exception:
             xmin = None
             xmax = None
         try:
@@ -111,7 +115,7 @@ class Axes:
                 self._get_first_valid(self._userlim.ymax, self._datalim.ymax))
             ymin = min(self._yticks)
             ymax = max(self._yticks)
-        except:
+        except Exception:
             ymin = None
             ymax = None
 
@@ -166,20 +170,20 @@ class Axes:
         if self.xaxis_location is not None:
             # X axis.
             xmin, xmax = map(math.floor, xaxis_x)
-            for x1 in range(xmin, xmax+1, 1):
+            for x1 in range(xmin, xmax + 1, 1):
                 try:
                     self.write(xaxis_y, x1, "_", clip=True)
-                except:
+                except Exception:
                     pass
         if self.yaxis_location is not None:
             if self.yaxis_location == "right":
                 yaxis_x = self.right
             # Y axis.
             ymax, ymin = map(math.ceil, yaxis_y)
-            for ypos in  range(ymin, ymax+1, 1):
+            for ypos in range(ymin, ymax + 1, 1):
                 try:
                     self.write(ypos, yaxis_x, "|", clip=False)
-                except:
+                except Exception:
                     pass
 
         # Build ticks.
@@ -193,18 +197,18 @@ class Axes:
                 try:
                     if self._is_inside(x=xpos):
                         self.write(xaxis_y + 1, xpos, "|")
-                except:
+                except Exception:
                     pass
                 # X tick labels.
                 try:
                     if self._is_inside(x=xpos):
-                        self.write(xaxis_y + 1, xpos+1, xstr)
-                except:
+                        self.write(xaxis_y + 1, xpos + 1, xstr)
+                except Exception:
                     pass
 
         if self.yaxis_location is not None:
             if self.yaxis_location == "left":
-                tickoff = yaxis_x-1
+                tickoff = yaxis_x - 1
             elif self.yaxis_location == "right":
                 tickoff = yaxis_x + 1
             # Y axis.
@@ -215,7 +219,7 @@ class Axes:
                 try:
                     if self._is_inside(y=ypos):
                         self.write(ypos, tickoff, "_")
-                except:
+                except Exception:
                     pass
                 # Y tick labels.
                 try:
@@ -224,7 +228,7 @@ class Axes:
                             self.write(ypos + 1, yaxis_x - len(ystr), ystr)
                         elif self.yaxis_location == "right":
                             self.write(ypos + 1, yaxis_x + 1, ystr)
-                except:
+                except Exception:
                     pass
 
     def line(
@@ -263,12 +267,12 @@ class Axes:
             x = x[0, :]
             y = y[:, 0]
         self._datalim.update(np.nanmin(x), np.nanmin(y), np.nanmax(x), np.nanmax(y))
-        self._set_transform(left=self._left+1, width=self._width-1)
+        self._set_transform(left=self._left + 1, width=self._width - 1)
         self.axes()
 
         wf, hf = self._transform(x, y)
         interp = RegularGridInterpolator((wf, hf), z, bounds_error=False, fill_value=None)
-        xx = np.linspace(self._left+2, self._left + self._width - 1, self._width - 1)
+        xx = np.linspace(self._left + 2, self._left + self._width - 1, self._width - 1)
         yy = np.linspace(self._top + 1, self._top + self._height, self._height)
         xx_g, yy_g = np.meshgrid(xx, yy)
         zz_g = interp((xx_g, yy_g))
@@ -317,7 +321,7 @@ class Axes:
         self._datalim.update(np.nanmin(x), np.nanmin(y), np.nanmax(x), np.nanmax(y))
         self._set_transform()
         self.matrix(x, y, z, cmap=cmap, norm=norm)
-        
+
     def bar(
         self,
         x, y, y0=None, c=None
@@ -326,7 +330,7 @@ class Axes:
 
         self._datalim.update(np.nanmin(x), np.nanmin(y), np.nanmax(x), np.nanmax(y))
         self._set_transform()
-        
+
         self.axes()
 
         if y0 is None:
@@ -334,10 +338,9 @@ class Axes:
 
         wf, hf = self._transform(x, y)
         wf0, hf0 = self._transform(x, y0)
-        xx = np.linspace(self._left, self._left+self._width, self._width)
+        xx = np.linspace(self._left, self._left + self._width, self._width)
         yy = np.interp(xx, wf, hf, left=np.nan, right=np.nan)
         yy0 = np.interp(xx, wf0, hf0, left=np.nan, right=np.nan)
-
 
         for xi, yi, yi0 in zip(xx, yy, yy0):
             if np.isnan(yi) or np.isnan(xi) or np.isnan(yi0):
@@ -348,10 +351,10 @@ class Axes:
             if yi0 > yi:
                 yi0, yi = yi, yi0
             if c is not None:
-                for y1 in range(yi0, yi+1):
+                for y1 in range(yi0, yi + 1):
                     self.write(y1, xi, "|", cmap[c], clip=True)
             else:
-                for y1 in range(yi0, yi+1):
+                for y1 in range(yi0, yi + 1):
                     self.write(y1, xi, "|", clip=True)
 
 
@@ -383,4 +386,3 @@ class Bounds:
                 self.ymax = ymax
             else:
                 self.ymax = max(self.ymax, ymax)
-

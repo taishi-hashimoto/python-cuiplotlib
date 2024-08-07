@@ -24,7 +24,7 @@ def autoticks(
         Default is `(1, 2, 2.5, 5, 10)`.
     """
     cands = []
-    for ndiv in range(1, nbins+1)[::-1]:
+    for ndiv in range(1, nbins + 1)[::-1]:
         width = (vmax - vmin) / ndiv
         log_w = math.log10(width)
         order = math.ceil(log_w)
@@ -54,9 +54,9 @@ def autoticks(
         return ticks
 
 
-def autoformat(ticks: list[float|int]) -> str:
+def autoformat(ticks: list[float | int]) -> str:
     """Automated format string for given ticks.
-    
+
     Parameters
     ==========
     ticks: list[float|int]
@@ -84,7 +84,7 @@ class StrFormatter:
     def __init__(self, format: str = None):
         self._format = format
 
-    def __call__(self, ticks: list[float|int]):
+    def __call__(self, ticks: list[float | int]):
         """Return formatted strings for given ticks.
 
         Parameters
@@ -97,6 +97,7 @@ class StrFormatter:
         else:
             fmt = self._format
         return [fmt.format(x) for x in ticks]
+
 
 default_formatter = StrFormatter()
 "Default formatter. `StrFormatter(format)` with `format = autoformat(ticks)`."
