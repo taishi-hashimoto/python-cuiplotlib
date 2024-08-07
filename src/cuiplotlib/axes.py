@@ -171,11 +171,13 @@ class Axes:
                 except:
                     pass
         if self._yaxis_location is not None:
+            if self._yaxis_location == "right":
+                yaxis_x += 1
             # Y axis.
             ymax, ymin = map(math.ceil, yaxis_y)
             for ypos in  range(ymin, ymax+1, 1):
                 try:
-                    self.write(ypos, yaxis_x, "|", clip=True)
+                    self.write(ypos, yaxis_x, "|", clip=False)
                 except:
                     pass
 
@@ -200,6 +202,10 @@ class Axes:
                     pass
 
         if self._yaxis_location is not None:
+            if self._yaxis_location == "left":
+                tickoff = yaxis_x-1
+            elif self._yaxis_location == "right":
+                tickoff = yaxis_x + 1
             # Y axis.
             yticklabels = self._yformatter(self._yticks)
             for ypos, ystr in zip(yticks, yticklabels):
@@ -207,7 +213,7 @@ class Axes:
                 ypos = math.ceil(ypos)
                 try:
                     if self._is_inside(y=ypos):
-                        self.write(ypos, yaxis_x-1, "_")
+                        self.write(ypos, tickoff, "_")
                 except:
                     pass
                 # Y tick labels.
