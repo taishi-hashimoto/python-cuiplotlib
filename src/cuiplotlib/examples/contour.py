@@ -12,7 +12,7 @@ def window(stdscr: curses.window):
     
     ax = Axes(stdscr, 2, 2, 10)
     cax = Axes(stdscr, ax.right + 2, 2, 5)
-    norm = Normalize(-3, 3)
+    norm = Normalize(-2, 2)
     cmap = Colormap.jet_bg()
 
     mqout = MQOut()
@@ -20,11 +20,13 @@ def window(stdscr: curses.window):
 
     while True:
         try:
-            nx = 20
-            ny = 30
-            x = np.linspace(-5, 5, nx)
-            y = np.linspace(-5, 5, ny)
-            ax.matrix(x, y, z, cmap=cmap, norm=norm)
+            x = np.linspace(-3, 3)
+            y = np.linspace(-3, 3)
+            x_g, y_g = np.meshgrid(x, y, indexing="ij")
+            z1 = np.exp(-x_g**2 - y_g**2)
+            z2 = np.exp(-(x_g - 1)**2 - (y_g - 1)**2)
+            z_g = (z1 - z2) * 2
+            ax.matrix(x, y, z_g, cmap=cmap, norm=norm)
 
             cax.colorbar(cmap, norm, formatter="{:.0f} dB")
             # cax.set_xlim(0, 1)
