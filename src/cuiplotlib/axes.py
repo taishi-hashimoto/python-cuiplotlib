@@ -90,6 +90,10 @@ class Axes:
         x_inside = x is None or self._left <= x <= self.right
         return y_inside and x_inside
 
+    def put(self, y: int, x: int, *args, clip=False, **kwargs):
+        if not clip or self._is_inside(y, x):
+            self._window.addch(int(y), int(x), *args, **kwargs)
+
     def write(self, y: int, x: int, *args, clip=False, **kwargs):
         """Same as `self._window.addstr(y, x, *args, **kwargs)`,
         with bounds check.
@@ -330,7 +334,6 @@ class Axes:
 
         self._datalim.update(np.nanmin(x), np.nanmin(y), np.nanmax(x), np.nanmax(y))
         self._set_transform()
-
         self.axes()
 
         if y0 is None:
@@ -338,7 +341,7 @@ class Axes:
 
         wf, hf = self._transform(x, y)
         wf0, hf0 = self._transform(x, y0)
-        xx = np.linspace(self._left, self._left + self._width, self._width)
+        xx = np.linspace(self._left, self._left + self._width - 1, self._width)
         yy = np.interp(xx, wf, hf, left=np.nan, right=np.nan)
         yy0 = np.interp(xx, wf0, hf0, left=np.nan, right=np.nan)
 
@@ -352,10 +355,10 @@ class Axes:
                 yi0, yi = yi, yi0
             if c is not None:
                 for y1 in range(yi0, yi + 1):
-                    self.write(y1, xi, "|", cmap[c], clip=True)
+                    self.put(y1, xi, curses.ACS_VLINE, cmap[c] | curses.A_BOLD, clip=True)
             else:
                 for y1 in range(yi0, yi + 1):
-                    self.write(y1, xi, "|", clip=True)
+                    self.put(y1, xi, curses.ACS_VLINE, clip=True)
 
 
 class Bounds:

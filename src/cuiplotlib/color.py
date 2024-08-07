@@ -1,5 +1,6 @@
 "Color library."
 import curses
+import math
 
 
 class ColorManager:
@@ -83,7 +84,7 @@ class Colormap:
     def get_color(self, value: float):
         "value: normalized value in [0, 1] range."
         try:
-            index = int(value * (len(self._colors)))
+            index = math.ceil(value * (len(self._colors)))
             if index < 0:
                 index = self._under
             elif index >= len(self._colors):
