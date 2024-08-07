@@ -78,15 +78,25 @@ def autoformat(ticks: list[float|int]) -> str:
     return f"{{:1.{sigfigs}f}}"
 
 
-def default_formatter(ticks: list[float|int]):
-    """Default formatter.
-
-    Simplified matplotlib's ScalarFormatter.
-    
-    Parameters
-    ==========
-    ticks: list[float|int]
-        Tick values.
+class StrFormatter:
+    """Simplified matplotlib's StrFormatter.
     """
-    fmt = autoformat(ticks)
-    return [fmt.format(x) for x in ticks]
+    def __init__(self, format: str = None):
+        self._format = format
+
+    def __call__(self, ticks: list[float|int]):
+        """Return formatted strings for given ticks.
+
+        Parameters
+        ==========
+        ticks: list[float|int]
+            Tick values.
+        """
+        if self._format is None:
+            fmt = autoformat(ticks)
+        else:
+            fmt = self._format
+        return [fmt.format(x) for x in ticks]
+
+default_formatter = StrFormatter()
+"Default formatter. `StrFormatter(format)` with `format = autoformat(ticks)`."

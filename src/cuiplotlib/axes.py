@@ -3,8 +3,8 @@ import math
 import numpy as np
 from scipy.interpolate import RegularGridInterpolator
 from .transform import Transform
-from .ticker import autoticks, default_formatter
-from .color import Colormap
+from .ticker import autoticks, StrFormatter, default_formatter
+from .color import Colormap, Normalize
 
 
 class Axes:
@@ -31,16 +31,17 @@ class Axes:
         self._autolim = Bounds()
         # User specified limits
         self._userlim = Bounds()
+
         self._transform = None
         self._xticks = None
-        self._xformatter = default_formatter
-        self._yformatter = default_formatter
         self._yticks = None
+
         self._x0 = None
         self._y0 = None
-
-        self._xaxis_location = "bottom"
-        self._yaxis_location = "left"
+        self.xaxis_formatter = default_formatter
+        self.yaxis_formatter = default_formatter
+        self.xaxis_location = "bottom"
+        self.yaxis_location = "left"
 
     @staticmethod
     def _get_first_valid(*args):
@@ -145,14 +146,14 @@ class Axes:
     def axes(self):
         # Axes
         if self._x0 is None:
-            if self._yaxis_location == "right":
+            if self.yaxis_location == "right":
                 x0 = self._xmax
             else:
                 x0 = self._xmin
         else:
             x0 = self._x0
         if self._y0 is None:
-            if self._xaxis_location == "top":
+            if self.xaxis_location == "top":
                 y0 = self._ymax
             else:
                 y0 = self._ymin
@@ -162,7 +163,7 @@ class Axes:
         yaxis_x, yaxis_y = self._transform(x0, np.array([self._ymin, self._ymax]))
         yaxis_x = math.floor(yaxis_x)
         xaxis_y = math.ceil(xaxis_y)
-        if self._xaxis_location is not None:
+        if self.xaxis_location is not None:
             # X axis.
             xmin, xmax = map(math.floor, xaxis_x)
             for x1 in range(xmin, xmax+1, 1):
@@ -170,9 +171,9 @@ class Axes:
                     self.write(xaxis_y, x1, "_", clip=True)
                 except:
                     pass
-        if self._yaxis_location is not None:
-            if self._yaxis_location == "right":
-                yaxis_x += 1
+        if self.yaxis_location is not None:
+            if self.yaxis_location == "right":
+                yaxis_x = self.right
             # Y axis.
             ymax, ymin = map(math.ceil, yaxis_y)
             for ypos in  range(ymin, ymax+1, 1):
@@ -184,9 +185,9 @@ class Axes:
         # Build ticks.
         xticks, yticks = self._transform(np.array(self._xticks), np.array(self._yticks))
 
-        if self._xaxis_location is not None:
+        if self.xaxis_location is not None:
             # X axis.
-            xticklabels = self._xformatter(self._xticks)
+            xticklabels = self.xaxis_formatter(self._xticks)
             for xpos, xstr in zip(xticks.astype(int), xticklabels):
                 # X ticks.
                 try:
@@ -201,13 +202,13 @@ class Axes:
                 except:
                     pass
 
-        if self._yaxis_location is not None:
-            if self._yaxis_location == "left":
+        if self.yaxis_location is not None:
+            if self.yaxis_location == "left":
                 tickoff = yaxis_x-1
-            elif self._yaxis_location == "right":
+            elif self.yaxis_location == "right":
                 tickoff = yaxis_x + 1
             # Y axis.
-            yticklabels = self._yformatter(self._yticks)
+            yticklabels = self.yaxis_formatter(self._yticks)
             for ypos, ystr in zip(yticks, yticklabels):
                 # Y ticks.
                 ypos = math.ceil(ypos)
@@ -219,9 +220,9 @@ class Axes:
                 # Y tick labels.
                 try:
                     if self._is_inside(y=ypos):
-                        if self._yaxis_location == "left":
+                        if self.yaxis_location == "left":
                             self.write(ypos + 1, yaxis_x - len(ystr), ystr)
-                        elif self._yaxis_location == "right":
+                        elif self.yaxis_location == "right":
                             self.write(ypos + 1, yaxis_x + 1, ystr)
                 except:
                     pass
@@ -280,6 +281,43 @@ class Axes:
         for xx1, yy1, zz1, cc1 in zip(xx_g.ravel(), yy_g.ravel(), zz_g.ravel(), cc_g.ravel()):
             self.write(yy1, xx1, cc1, zz1)
 
+    def colorbar(
+        self,
+        cmap: Colormap,
+        norm: Normalize = None,
+        vmin: float = None,
+        vmax: float = None,
+        formatter: str = StrFormatter(),
+        extend=None,
+        title=None,
+        orientation="vertical"
+    ):
+        if norm is not None:
+            vmin = norm._vmin
+            vmax = norm._vmax
+        norm = Normalize(vmin, vmax)
+        if isinstance(formatter, str):
+            formatter = StrFormatter(formatter)
+        self.xaxis_formatter = formatter
+        self.yaxis_formatter = formatter
+        if orientation.startswith("v"):
+            self.xaxis_location = None
+            self.yaxis_location = "right"
+            self.set_xlim(0, 1)
+            x = np.linspace(0, 1, 1)
+            y = np.linspace(vmin, vmax)
+            z = [y]
+        else:
+            self.xaxis_location = "bottom"
+            self.yaxis_location = None
+            self.set_ylim(0, 1)
+            x = np.linspace(vmin, vmax)
+            y = np.linspace(0, 1, 1)
+            z = np.transpose([x])
+        self._datalim.update(np.nanmin(x), np.nanmin(y), np.nanmax(x), np.nanmax(y))
+        self._set_transform()
+        self.matrix(x, y, z, cmap=cmap, norm=norm)
+        
     def bar(
         self,
         x, y, y0=None, c=None
